@@ -1,0 +1,5 @@
+groq
+langchain
+langchain[groq]
+streamlit
+langchain_community
