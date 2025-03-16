@@ -1,6 +1,7 @@
 import requests
 from langchain_community.utilities import SQLDatabase
 from langchain_community.tools.sql_database.tool import ListSQLDatabaseTool, InfoSQLDatabaseTool
+import re
 
 def get_all_groq_model(api_key:str=None) -> list:
     if api_key is None:
@@ -44,5 +45,13 @@ def get_info(uri:str) -> dict[str, str] | None:
     tables_schemas = InfoSQLDatabaseTool(db=db).invoke(access_tables)
     return {'sql_dialect': dialect, 'tables': access_tables, 'tables_schema': tables_schemas}
 
+def extract_code_blocks(text):
+    pattern = r"```(?:\w+)?\n(.*?)\n```"
+    matches = re.findall(pattern, text, re.DOTALL)
+    return matches
+
 if __name__ == "__main__":
-    print(get_all_groq_model())
+    models = (get_all_groq_model("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"))
+    vision_audio = [model for model in models if 'vision' in model or 'whisper' in model]
+    models = [model for model in models if model not in vision_audio]
+    print(models)
