@@ -51,7 +51,4 @@ def extract_code_blocks(text):
     return matches
 
 if __name__ == "__main__":
-    models = (get_all_groq_model("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"))
-    vision_audio = [model for model in models if 'vision' in model or 'whisper' in model]
-    models = [model for model in models if model not in vision_audio]
-    print(models)
+    pass
