@@ -1,5 +1,5 @@
 from typing import Generator
-from utils import validate_api_key, get_info, validate_uri, extract_code_blocks
+from utils import validate_api_key, get_info, validate_uri, extract_code_blocks, get_info_sqlalchemy
 from langchain_community.utilities import SQLDatabase
 from var import system_prompt, markdown_info, query_output, groq_models
 import streamlit as st
@@ -10,6 +10,7 @@ st.set_page_config(layout="wide")
 # Initialize chat history and selected model
 if "messages" not in st.session_state:
     st.session_state.messages = []
+    st.session_state.sql_result = []
 
 if "selected_model" not in st.session_state:
     st.session_state.selected_model = None
@@ -29,6 +30,7 @@ else:
 
 if st.session_state.selected_model != model:
     st.session_state.messages = []
+    st.session_state.sql_result = []
     st.session_state.selected_model = model
 
 uri = st.sidebar.text_input("Enter SQL Database URI")
@@ -37,7 +39,7 @@ if not validate_uri(uri):
     st.sidebar.error("Enter valid URI")
 else:
     st.sidebar.success("URI is valid")
-    db_info = get_info(uri)
+    db_info = get_info_sqlalchemy(uri)
     markdown_info = markdown_info.format(**db_info)
     with st.expander("SQL Database Info"):
         st.markdown(markdown_info)
@@ -53,9 +55,12 @@ if validate_api_key(api_key) and validate_uri(uri):
     avatar = {"user": '👨‍💻', "assistant": '🤖', "executor": '🛢'}
 
     # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
+    for i, message in enumerate(st.session_state.messages):
         with st.chat_message(message["role"], avatar=avatar[message["role"]]):
             st.markdown(message["content"])
+        if (i+1)%2 == 0:
+            with st.chat_message("SQL Executor", avatar=avatar["executor"]):
+                st.markdown(st.session_state.sql_result[i//2])
 
 
     def generate_chat_responses(chat_completion) -> Generator[str, None, None]:
@@ -109,17 +114,19 @@ if validate_api_key(api_key) and validate_uri(uri):
         else:
             query_output_truncated = query_output.format(result=result)
 
+        st.session_state.sql_result.append(query_output_truncated)
+
         # Append the llm response to session_state.messages
         if isinstance(llm_response, str):
             st.session_state.messages.append(
-                {"role": "assistant", "content": llm_response + query_output_truncated})
+                {"role": "assistant", "content": llm_response})
         else:
             # Handle the case where llm_response is not a string
             combined_response = "\n".join(str(item) for item in llm_response)
             st.session_state.messages.append(
-                {"role": "assistant", "content": combined_response + query_output_truncated})
+                {"role": "assistant", "content": combined_response})
 
-    st.sidebar.button("Clear Chat History", on_click=lambda: st.session_state.messages.clear())
+    st.sidebar.button("Clear Chat History", on_click=lambda: st.session_state.messages.clear() and st.session_state.sql_result.clear())
 
 else:
     st.error("Please enter valid Groq API Key and URI in the sidebar.")
