@@ -113,7 +113,7 @@ def get_unique_values(engine:Engine, table:Table) -> str:
 
     output_str = f"Unique values of each column in {table.name}: \n"
     for column, values in unique_values.items():
-        output_str += f"{column} has {len(values)} unique values: {" ".join(values[:20])}"
+        output_str += f"{column} has {len(values)} unique values: {' '.join(values[:20])}"
         if len(values) > 20:
             output_str += ", ...."
         output_str += "\n"
