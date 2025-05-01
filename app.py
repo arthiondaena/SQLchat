@@ -1,9 +1,9 @@
 from typing import Generator
-from utils import validate_api_key, get_info, validate_uri, extract_code_blocks, get_info_sqlalchemy
+from utils import validate_uri, extract_code_blocks, get_info_sqlalchemy
 from langchain_community.utilities import SQLDatabase
-from var import system_prompt, markdown_info, query_output, groq_models
+from var import system_prompt, markdown_info, query_output
 import streamlit as st
-from groq import Groq
+from openai import OpenAI
 
 st.set_page_config(layout="wide")
 
@@ -18,15 +18,9 @@ if "selected_model" not in st.session_state:
 st.markdown("# SQL Chat")
 
 st.sidebar.title("Settings")
-api_key = st.sidebar.text_input("Groq API Key", type="password")
-
-# validating api_key
-if not validate_api_key(api_key):
-    st.sidebar.error("Enter valid API Key")
-    model = st.sidebar.selectbox("Select Model", groq_models, disabled=True)
-else:
-    st.sidebar.success("API Key is valid")
-    model = st.sidebar.selectbox("Select Model", groq_models, index=0)
+base_url = st.sidebar.text_input("Base URL", help="OpenAI compatible API")
+api_key = st.sidebar.text_input("API Key")
+model = st.sidebar.text_input("Model ID")
 
 if st.session_state.selected_model != model:
     st.session_state.messages = []
@@ -45,8 +39,9 @@ else:
         st.markdown(markdown_info)
     system_prompt = system_prompt.format(markdown_info = markdown_info)
 
-if validate_api_key(api_key) and validate_uri(uri):
-    client = Groq(
+if base_url and api_key and model and uri:
+    client = OpenAI(
+        base_url=base_url,
         api_key=api_key,
     )
 
@@ -127,6 +122,3 @@ if validate_api_key(api_key) and validate_uri(uri):
                 {"role": "assistant", "content": combined_response})
 
     st.sidebar.button("Clear Chat History", on_click=lambda: st.session_state.messages.clear() and st.session_state.sql_result.clear())
-
-else:
-    st.error("Please enter valid Groq API Key and URI in the sidebar.")
