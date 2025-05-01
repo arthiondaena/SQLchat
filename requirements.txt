@@ -4,3 +4,4 @@ langchain[groq]
 streamlit
 langchain_community
 openai
+psycopg2
