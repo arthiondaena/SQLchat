@@ -12,7 +12,7 @@ jobs:
     - name: Sync with Hugging Face
       uses: nateraw/huggingface-sync-action@v0.0.4
       with:
-        github_repo_id: arthiondaena/SQLchat2
+        github_repo_id: arthiondaena/SQLchat
         huggingface_repo_id: Invicto69/SQLchat2
         repo_type: space
         space_sdk: streamlit
