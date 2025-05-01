@@ -15,6 +15,6 @@ jobs:
         github_repo_id: arthiondaena/SQLchat
         huggingface_repo_id: Invicto69/SQLchat2
         repo_type: space
-        space_sdk: streamlit
+        space_sdk: docker
         private: false
         hf_token: ${{ secrets.HF_TOKEN }}
