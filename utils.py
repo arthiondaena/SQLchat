@@ -50,7 +50,7 @@ def validate_uri(uri:str) -> bool:
     except Exception as e:
         return False
 
-def get_info(uri:str) -> dict[str, str] | None:
+def get_info(uri:str) -> dict:
     """Gets the dialect name, accessible tables and table schemas using the SQLDatabase toolkit"""
     db = SQLDatabase.from_uri(uri)
     dialect = db.dialect
@@ -120,7 +120,7 @@ def get_unique_values(engine:Engine, table:Table) -> str:
 
     return output_str
 
-def get_info_sqlalchemy(uri:str) -> dict[str, str] | None:
+def get_info_sqlalchemy(uri:str) -> dict:
     """Gets the dialect name, accessible tables and table schemas using the SQLAlchemy engine"""
     engine = create_engine(uri)
     # Get dialect name using inspector
